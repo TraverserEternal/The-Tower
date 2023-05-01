@@ -37,7 +37,7 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "1D Axis",
+                    "name": "A/D",
                     "id": "18d9801e-58b5-4909-9ebd-d374c62ecba9",
                     "path": "1DAxis",
                     "interactions": "",
@@ -62,6 +62,39 @@
                     "name": "positive",
                     "id": "fd075e57-2863-4ffd-b173-e003c7e4ac95",
                     "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Left/Right",
+                    "id": "b4752071-18d9-44bb-9744-6cc28761365c",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "move",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "cf8a526a-1e28-499e-aa43-b9b1b5c2de53",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "e8dbe816-369a-44a0-b50c-cff420b465b0",
+                    "path": "<Keyboard>/rightArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
