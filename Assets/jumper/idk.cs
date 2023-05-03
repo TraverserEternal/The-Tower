@@ -27,13 +27,13 @@ public class idk : MonoBehaviour
 
   private void Jump(InputAction.CallbackContext context)
   {
-
     if (IsGrounded()) rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
   }
 
   private bool IsGrounded()
   {
-    RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 0.1f);
+    int layerMask = ~(1 << LayerMask.NameToLayer("Player"));
+    RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 0.55f, layerMask);
     return hit.collider != null;
   }
 
