@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 public class idk : MonoBehaviour
 {
   private float moveDirection = 0;
+  public InteractableManager interactableManager {get; private set;} = new InteractableManager();
   [SerializeField] Rigidbody2D rb;
   [SerializeField] float moveSpeed = 1;
   [SerializeField] float jumpForce = 1;

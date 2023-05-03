@@ -44,6 +44,15 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""interact"",
+                    ""type"": ""Button"",
+                    ""id"": ""79e5afb7-1798-4ebe-aa5f-ee8753c2a868"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -123,6 +132,17 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
                     ""action"": ""move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f686e288-9753-4bc5-95f4-fd234cd72c79"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -133,6 +153,7 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
         m_base = asset.FindActionMap("base", throwIfNotFound: true);
         m_base_jump = m_base.FindAction("jump", throwIfNotFound: true);
         m_base_move = m_base.FindAction("move", throwIfNotFound: true);
+        m_base_interact = m_base.FindAction("interact", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -196,12 +217,14 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
     private List<IBaseActions> m_BaseActionsCallbackInterfaces = new List<IBaseActions>();
     private readonly InputAction m_base_jump;
     private readonly InputAction m_base_move;
+    private readonly InputAction m_base_interact;
     public struct BaseActions
     {
         private @JumperInput m_Wrapper;
         public BaseActions(@JumperInput wrapper) { m_Wrapper = wrapper; }
         public InputAction @jump => m_Wrapper.m_base_jump;
         public InputAction @move => m_Wrapper.m_base_move;
+        public InputAction @interact => m_Wrapper.m_base_interact;
         public InputActionMap Get() { return m_Wrapper.m_base; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -217,6 +240,9 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
             @move.started += instance.OnMove;
             @move.performed += instance.OnMove;
             @move.canceled += instance.OnMove;
+            @interact.started += instance.OnInteract;
+            @interact.performed += instance.OnInteract;
+            @interact.canceled += instance.OnInteract;
         }
 
         private void UnregisterCallbacks(IBaseActions instance)
@@ -227,6 +253,9 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
             @move.started -= instance.OnMove;
             @move.performed -= instance.OnMove;
             @move.canceled -= instance.OnMove;
+            @interact.started -= instance.OnInteract;
+            @interact.performed -= instance.OnInteract;
+            @interact.canceled -= instance.OnInteract;
         }
 
         public void RemoveCallbacks(IBaseActions instance)
@@ -248,5 +277,6 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
     {
         void OnJump(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
+        void OnInteract(InputAction.CallbackContext context);
     }
 }
