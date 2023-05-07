@@ -19,18 +19,20 @@ public abstract class SaveManager<T> : Singleton<SaveManager<T>> where T : SaveD
     persistentDataPath = Application.persistentDataPath;
     FileManager.saveFolderPath.Set("Save1"); // Should be removed; Testing
     SaveData = Util.AddDebounce(SaveDataImmediate, 1000);
-    prepareDataObject(SaveData);
+    PrepareDataObject(SaveData);
   }
 
-  private void prepareDataObject(System.Action listener)
+  private void PrepareDataObject(System.Action listener)
   {
     data = new();
     typeof(T).GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)
-      .Where(p => p.GetValue(data) is TowerEvent.AnyStatefulTowerEvent).ToList().ForEach(property =>
+      .AsParallel()
+      .Where(p => p.GetValue(data) is TowerEvent.AnyStatefulTowerEvent).Select(property =>
       {
         TowerEvent.AnyTowerEvent dataPoint = (TowerEvent.AnyTowerEvent)property.GetValue(data);
         Debug.Log("Adding event listener to " + property.Name);
         dataPoint.Subscribe(listener);
+        return property;
       });
   }
 
@@ -50,7 +52,7 @@ public abstract class SaveManager<T> : Singleton<SaveManager<T>> where T : SaveD
   }
   private async Task SaveDataImmediate()
   {
-    Debug.Log("Saving Data!"); try
+    try
     {
       await FileManager.SerializeAsync(data.CreateDTO(), Path.Combine(
         persistentDataPath,

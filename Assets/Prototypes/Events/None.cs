@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.Serialization;
 using UnityEngine;
 namespace TowerEvent
 {
@@ -34,10 +33,8 @@ namespace TowerEvent
     public object objectV { get; }
   }
 
-  [DataContract(Name = "Stateful")]
   public abstract class Stateful<T> : ScriptableObject, AnyStatefulTowerEvent
   {
-    [DataMember(Name = "value")]
     public T v { get; private set; }
     public object objectV => (object)v;
     public static implicit operator T(Stateful<T> stateful) => stateful.v;

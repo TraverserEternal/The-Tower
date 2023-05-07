@@ -19,4 +19,8 @@ public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
       DontDestroyOnLoad(gameObject);
     }
   }
+  private void OnDestroy()
+  {
+    if (current == this) current = null;
+  }
 }

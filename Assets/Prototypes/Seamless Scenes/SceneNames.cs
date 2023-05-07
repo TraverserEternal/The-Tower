@@ -1,6 +1,7 @@
   public enum SceneNames
   {
-    Seamless,
-    Seamless_2,
+    None,
     Seamless_3,
+    Seamless_2,
+    Seamless,
   }

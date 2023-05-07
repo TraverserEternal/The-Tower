@@ -1,20 +1,23 @@
+using System;
+using TowerEvent;
 using UnityEngine;
 
-public class Door : MonoBehaviour
+[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(SpriteRenderer))]
+public class Door : SaveListener<bool>
 {
-  private void Start()
+  private BoxCollider2D boxCollider2D;
+  private SpriteRenderer spriteRenderer;
+  private void OnValidate()
   {
-    HearthanSaveManager.current.data.doorUnlocked.Subscribe(SetDoor);
+    boxCollider2D = GetComponent<BoxCollider2D>();
+    spriteRenderer = GetComponent<SpriteRenderer>();
   }
+  public override Stateful<bool> GetSaveData() => HearthanSaveManager.current.data.doorOpened;
 
-  private void SetDoor(bool doorUnlocked)
+  protected override void OnSaveDataChange(bool doorOpened)
   {
-    if (doorUnlocked) gameObject.SetActive(false);
-  }
-
-  private void OnTriggerEnter2D(Collider2D other)
-  {
-    HearthanSaveManager.current.data.doorUnlocked.Set(true);
-    gameObject.SetActive(false);
+    boxCollider2D.enabled = !doorOpened;
+    spriteRenderer.enabled = !doorOpened;
   }
 }

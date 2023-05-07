@@ -10,10 +10,8 @@ public abstract class SaveData
     var properties = GetType().GetProperties();
     foreach (var property in properties)
     {
-      Debug.Log("property: " + property.Name);
       if (typeof(TowerEvent.AnyStatefulTowerEvent).IsAssignableFrom(property.PropertyType))
       {
-        Debug.Log("is assignable");
         var towerEvent = ScriptableObject.CreateInstance(property.PropertyType);
         property.SetValue(this, towerEvent);
       }
@@ -26,7 +24,6 @@ public abstract class SaveData
   }
   public virtual Dictionary<string, object> CreateDTO()
   {
-    Debug.Log(this.GetType());
     var dto = new Dictionary<string, object>();
     var properties = GetType().GetProperties();
     foreach (var property in properties)
@@ -41,7 +38,6 @@ public abstract class SaveData
   }
   public virtual void LoadDTO(Dictionary<string, object> dto)
   {
-    dto.Keys.ToList().ForEach(k => Debug.Log(k));
     var properties = GetType().GetProperties();
     var missingProperties = new List<string>();
     foreach (var property in properties)
@@ -49,11 +45,7 @@ public abstract class SaveData
       if (dto.TryGetValue(property.Name, out var value))
       {
         var stateful = property.GetValue(this) as TowerEvent.AnyStatefulTowerEvent;
-        if (stateful != null)
-        {
-          Debug.Log("Setting Stateful...");
-          stateful.AttemptSet(value);
-        }
+        if (stateful != null) stateful.AttemptSet(value);
       }
       else
       {
