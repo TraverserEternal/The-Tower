@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
 using UnityEngine;
 namespace TowerEvent
@@ -30,11 +28,18 @@ namespace TowerEvent
     public void Unsubscribe(Action subscriber);
   }
 
+  public interface AnyStatefulTowerEvent : AnyTowerEvent
+  {
+    public void AttemptSet(object value);
+    public object objectV { get; }
+  }
+
   [DataContract(Name = "Stateful")]
-  public abstract class Stateful<T> : ScriptableObject, AnyTowerEvent
+  public abstract class Stateful<T> : ScriptableObject, AnyStatefulTowerEvent
   {
     [DataMember(Name = "value")]
     public T v { get; private set; }
+    public object objectV => (object)v;
     public static implicit operator T(Stateful<T> stateful) => stateful.v;
     protected Action action { get; set; }
 
@@ -62,6 +67,11 @@ namespace TowerEvent
     public void Unsubscribe(Action subscriber)
     {
       action -= subscriber;
+    }
+
+    public void AttemptSet(object value)
+    {
+      Set((T)value);
     }
   }
 }
