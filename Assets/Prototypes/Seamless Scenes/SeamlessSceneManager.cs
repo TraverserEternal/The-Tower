@@ -6,48 +6,48 @@ using System.Linq;
 
 public class SeamlessSceneManager : Singleton<SeamlessSceneManager>
 {
-  public float unloadDelay = 1f;
+  public static float unloadDelay = 1f;
 
-  private List<SceneNames> loadedScenes = new List<SceneNames>();
-  private List<SceneNames> scenesToLoad = new List<SceneNames>();
-  private Dictionary<SceneNames, float> sceneUnloadTimers = new Dictionary<SceneNames, float>();
+  private List<Scene> loadedScenes = new();
+  private List<Scene> scenesToLoad = new();
+  private Dictionary<Scene, float> sceneUnloadTimers = new();
 
   protected override void Awake()
   {
-    SceneNames startingScene = (SceneNames)gameObject.scene.buildIndex;
+    var startingScene = gameObject.scene;
     base.Awake();
     loadedScenes.Add(startingScene);
   }
   private void Update()
   {
-    foreach (SceneNames sceneName in sceneUnloadTimers.Keys.ToArray())
+    foreach (Scene scene in sceneUnloadTimers.Keys.ToArray())
     {
-      if (Time.time >= sceneUnloadTimers[sceneName])
+      if (Time.time >= sceneUnloadTimers[scene])
       {
-        UnloadScene(sceneName);
+        UnloadScene(scene);
       }
     }
   }
 
-  public void LoadScenes(params SceneNames[] scenes)
+  public void LoadScenes(params Scene[] scenes)
   {
-    foreach (SceneNames sceneName in scenes)
+    foreach (Scene scene in scenes)
     {
-      if (!loadedScenes.Contains(sceneName))
+      if (!loadedScenes.Contains(scene))
       {
-        SceneManager.LoadScene(sceneName.ToString().Replace("_", " "), LoadSceneMode.Additive);
-        loadedScenes.Add(sceneName);
+        SceneManager.LoadScene(scene.buildIndex);
+        loadedScenes.Add(scene);
       }
 
-      if (!scenesToLoad.Contains(sceneName))
+      if (!scenesToLoad.Contains(scene))
       {
-        scenesToLoad.Add(sceneName);
+        scenesToLoad.Add(scene);
       }
 
-      sceneUnloadTimers.Remove(sceneName);
+      sceneUnloadTimers.Remove(scene);
     }
 
-    foreach (SceneNames loadedScene in loadedScenes)
+    foreach (Scene loadedScene in loadedScenes)
     {
       if (!scenesToLoad.Contains(loadedScene))
       {
@@ -58,15 +58,14 @@ public class SeamlessSceneManager : Singleton<SeamlessSceneManager>
     scenesToLoad.Clear();
   }
 
-  private void UnloadScene(SceneNames sceneName)
+  private void UnloadScene(Scene scene)
   {
-    if (loadedScenes.Contains(sceneName))
+    if (loadedScenes.Contains(scene))
     {
-      Debug.Log("Unloading scene " + sceneName.ToString().Replace("_", " "));
-      SceneManager.UnloadSceneAsync(sceneName.ToString().Replace("_", " "));
-      loadedScenes.Remove(sceneName);
+      SceneManager.UnloadSceneAsync(scene.buildIndex);
+      loadedScenes.Remove(scene);
     }
 
-    sceneUnloadTimers.Remove(sceneName);
+    sceneUnloadTimers.Remove(scene);
   }
 }

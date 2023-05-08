@@ -1,4 +1,4 @@
-using UnityEngine;
+using TowerEvent.WithState;
 
 public class HearthanSaveManager : SaveManager<HearthanSaveData>
 {
@@ -7,9 +7,9 @@ public class HearthanSaveManager : SaveManager<HearthanSaveData>
 
 public class HearthanSaveData : SaveData
 {
-  public TowerEvent.WithState.Bool doorUnlocked { get; private set; }
+  public Bool doorOpened { get; private set; }
   public HearthanSaveData() : base()
   {
-    doorUnlocked.Set(false);
+    doorOpened.Set(false);
   }
 }

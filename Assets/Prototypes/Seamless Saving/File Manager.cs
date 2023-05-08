@@ -9,7 +9,7 @@ public static class FileManager
 
   public static async Task SerializeAsync<T>(T obj, string filePath)
   {
-    Debug.Log(filePath);
+    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
     using (var fileStream = new FileStream(filePath + ".bin", FileMode.Create))
     {
       await Task.Run(() =>

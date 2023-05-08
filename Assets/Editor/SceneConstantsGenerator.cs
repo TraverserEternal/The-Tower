@@ -24,12 +24,12 @@ public static class SceneConstantsGenerator
     {
       writer.WriteLine("  public enum SceneNames");
       writer.WriteLine("  {");
+      writer.WriteLine("    " + "None,");
 
       foreach (string sceneName in sceneNames)
       {
         writer.WriteLine("    " + sceneName.Replace(" ", "_") + ",");
       }
-
       writer.WriteLine("  }");
     }
 
