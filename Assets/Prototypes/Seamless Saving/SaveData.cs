@@ -1,21 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public abstract class SaveData
 {
   public SaveData()
   {
-    var properties = GetType().GetProperties();
-    foreach (var property in properties)
+    var properties = GetType().GetProperties().ToList();
+    properties.ForEach(property =>
     {
-      if (typeof(TowerEvent.AnyStatefulTowerEvent).IsAssignableFrom(property.PropertyType))
+      if (typeof(AnyStatefulTowerEvent).IsAssignableFrom(property.PropertyType))
       {
         var towerEvent = ScriptableObject.CreateInstance(property.PropertyType);
         property.SetValue(this, towerEvent);
       }
-    }
+    });
   }
 
   private void Initialize()
@@ -26,32 +27,30 @@ public abstract class SaveData
   {
     var dto = new Dictionary<string, object>();
     var properties = GetType().GetProperties();
-    foreach (var property in properties)
+    Parallel.ForEach(properties, property =>
     {
-      var stateful = property.GetValue(this) as TowerEvent.AnyStatefulTowerEvent;
-      if (stateful != null)
-      {
-        dto[property.Name] = stateful.objectV;
-      }
-    }
+      var stateful = property.GetValue(this) as AnyStatefulTowerEvent;
+      if (stateful != null) dto[property.Name] = stateful.objectV;
+    });
     return dto;
   }
   public virtual void LoadDTO(Dictionary<string, object> dto)
   {
     var properties = GetType().GetProperties();
     var missingProperties = new List<string>();
-    foreach (var property in properties)
+    properties.ToList().ForEach(property =>
     {
+
       if (dto.TryGetValue(property.Name, out var value))
       {
-        var stateful = property.GetValue(this) as TowerEvent.AnyStatefulTowerEvent;
+        var stateful = property.GetValue(this) as AnyStatefulTowerEvent;
         if (stateful != null) stateful.AttemptSet(value);
       }
       else
       {
         missingProperties.Add(property.Name);
       }
-    }
+    });
 
     if (missingProperties.Any() || dto.Keys.Except(properties.Select(p => p.Name)).Any())
     {

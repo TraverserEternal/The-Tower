@@ -9,7 +9,6 @@ public abstract class SaveManager<T> : Singleton<SaveManager<T>> where T : SaveD
 {
   public string persistentDataPath;
   public T data;
-  public TowerEvent.None loaded;
   public abstract string filePath { get; }
   private Action SaveData;
   protected override void Awake()
@@ -25,15 +24,18 @@ public abstract class SaveManager<T> : Singleton<SaveManager<T>> where T : SaveD
   private void PrepareDataObject(System.Action listener)
   {
     data = new();
-    typeof(T).GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)
-      .AsParallel()
-      .Where(p => p.GetValue(data) is TowerEvent.AnyStatefulTowerEvent).Select(property =>
+    try
+    {
+
+      var properties = typeof(T).GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+      Parallel.ForEach(properties, property =>
       {
-        TowerEvent.AnyTowerEvent dataPoint = (TowerEvent.AnyTowerEvent)property.GetValue(data);
+        AnyTowerEvent dataPoint = (AnyTowerEvent)property.GetValue(data);
         Debug.Log("Adding event listener to " + property.Name);
         dataPoint.Subscribe(listener);
-        return property;
       });
+    }
+    catch (AggregateException ae) { Debug.Log(ae); }
   }
 
   protected virtual void Start()
@@ -48,7 +50,6 @@ public abstract class SaveManager<T> : Singleton<SaveManager<T>> where T : SaveD
       filePath));
     if (fileRep == null) Debug.Log("Data was null");
     else data.LoadDTO(fileRep);
-    loaded.Trigger();
   }
   private async Task SaveDataImmediate()
   {

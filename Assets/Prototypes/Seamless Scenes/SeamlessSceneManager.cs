@@ -8,19 +8,19 @@ public class SeamlessSceneManager : Singleton<SeamlessSceneManager>
 {
   public static float unloadDelay = 1f;
 
-  private List<Scene> loadedScenes = new();
-  private List<Scene> scenesToLoad = new();
-  private Dictionary<Scene, float> sceneUnloadTimers = new();
+  private List<string> loadedScenes = new();
+  private List<string> scenesToLoad = new();
+  private Dictionary<string, float> sceneUnloadTimers = new();
 
   protected override void Awake()
   {
-    var startingScene = gameObject.scene;
+    var startingScene = gameObject.scene.name;
     base.Awake();
     loadedScenes.Add(startingScene);
   }
   private void Update()
   {
-    foreach (Scene scene in sceneUnloadTimers.Keys.ToArray())
+    foreach (string scene in sceneUnloadTimers.Keys.ToArray())
     {
       if (Time.time >= sceneUnloadTimers[scene])
       {
@@ -29,13 +29,13 @@ public class SeamlessSceneManager : Singleton<SeamlessSceneManager>
     }
   }
 
-  public void LoadScenes(params Scene[] scenes)
+  public void LoadScenes(params string[] scenes)
   {
-    foreach (Scene scene in scenes)
+    foreach (string scene in scenes)
     {
       if (!loadedScenes.Contains(scene))
       {
-        SceneManager.LoadScene(scene.buildIndex);
+        SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
         loadedScenes.Add(scene);
       }
 
@@ -47,7 +47,7 @@ public class SeamlessSceneManager : Singleton<SeamlessSceneManager>
       sceneUnloadTimers.Remove(scene);
     }
 
-    foreach (Scene loadedScene in loadedScenes)
+    foreach (string loadedScene in loadedScenes)
     {
       if (!scenesToLoad.Contains(loadedScene))
       {
@@ -58,11 +58,11 @@ public class SeamlessSceneManager : Singleton<SeamlessSceneManager>
     scenesToLoad.Clear();
   }
 
-  private void UnloadScene(Scene scene)
+  private void UnloadScene(string scene)
   {
     if (loadedScenes.Contains(scene))
     {
-      SceneManager.UnloadSceneAsync(scene.buildIndex);
+      SceneManager.UnloadSceneAsync(scene);
       loadedScenes.Remove(scene);
     }
 

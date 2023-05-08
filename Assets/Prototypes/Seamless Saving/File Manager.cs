@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class FileManager
 {
-  public static TowerEvent.WithState.String saveFolderPath = ScriptableObject.CreateInstance<TowerEvent.WithState.String>();
+  public static TowerEvent.WithState<string> saveFolderPath = ScriptableObject.CreateInstance<TowerEvent.String>();
 
   public static async Task SerializeAsync<T>(T obj, string filePath)
   {

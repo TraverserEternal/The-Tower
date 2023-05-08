@@ -3,7 +3,7 @@ using UnityEngine;
 
 public abstract class SaveListener<T> : MonoBehaviour
 {
-  public abstract TowerEvent.Stateful<T> GetSaveData();
+  public abstract TowerEvent.WithState<T> GetSaveData();
 
   private bool hasSubscribed;
   protected virtual void OnEnable()

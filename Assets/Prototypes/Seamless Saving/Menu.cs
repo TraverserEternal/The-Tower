@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using TowerEvent.WithState;
 using UnityEngine;
 
 public class Menu : MonoBehaviour
@@ -22,10 +21,10 @@ public class Menu : MonoBehaviour
 
 public class MenuSaveData : SaveData
 {
-  public SceneName sceneToLoad { get; private set; }
+  public TowerEvent.WithState<string> sceneToLoad { get; private set; }
 
   public MenuSaveData() : base()
   {
-    this.sceneToLoad.Set(SceneNames.None);
+    this.sceneToLoad.Set("Landing Zone");
   }
 }
