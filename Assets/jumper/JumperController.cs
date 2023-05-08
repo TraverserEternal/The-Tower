@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
 public class idk : MonoBehaviour
 {
   private float moveDirection = 0;
@@ -11,6 +12,9 @@ public class idk : MonoBehaviour
   [SerializeField] Rigidbody2D rb;
   [SerializeField] float moveSpeed = 1;
   [SerializeField] float jumpForce = 1;
+  public float health = 100;
+  
+ 
   // Start is called before the first frame update
   void Start()
   {
@@ -18,6 +22,7 @@ public class idk : MonoBehaviour
     I.actions.@base.move.performed += Move;
     I.actions.@base.move.canceled += Move;
     I.actions.Enable();
+  
   }
 
   private void Update()
@@ -43,4 +48,12 @@ public class idk : MonoBehaviour
     // get the value of the move action's axis
     moveDirection = context.ReadValue<float>();
   }
+
+ private void OnCollisionEnter2D(Collision2D other) {
+        if (other.gameObject.CompareTag("enemy"))
+        {
+        health -= 25;
+        }
+    }
+
 }

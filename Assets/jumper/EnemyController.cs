@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour
 {
-    [SerializeField] float enemySpeed = 1;
-    [SerializeField] float enemyJumpForce = 1;
-    Transform target;
     [SerializeField] Rigidbody2D eRb;
-    Vector2 moveDirection;
+    [SerializeField] float enemySpeed = 1;
+    [SerializeField] float enemyJumpForce = 1; // how do i make it jump!!!! :(
+
+    Transform target;
+    Vector2 moveDirection; 
     
     private void Awake() 
     {
@@ -26,16 +27,17 @@ public class EnemyController : MonoBehaviour
     {
         if (target)// checks that target is not null
         {
-            Vector3 direction = (target.position-transform.position).normalized;
+            Vector3 direction = (target.position-transform.position).normalized; // gets the location of where to go
             moveDirection = direction;
         }
-    }
 
-    private void FixedUpdate() 
+    }
+    private void FixedUpdate() //called more frequently than update 
     {
         if (target)
         {
             eRb.velocity = new Vector2(moveDirection.x,moveDirection.y)*enemySpeed;
         }
     }
+
 }
