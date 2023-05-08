@@ -1,18 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using TMPro;
 public class Health : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public float health { get; private set; }
+    [SerializeField] float maxHealth = 3;
+    [SerializeField] TextMeshPro healthText;
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        
+        SetHealth(maxHealth);
+    }
+    public void SetHealth(float value)
+    {
+        healthText.text = $"hp: {value.ToString()}";
+        health = value;
+        if (health <= 0) Destroy(gameObject);
+    }
+    public void Damage(float damage)
+    {
+        SetHealth(health - damage);
     }
 }
