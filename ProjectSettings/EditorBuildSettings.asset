@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Prototypes/Player Movement/Player Movement.unity
+    guid: fce7d50840931da4a87630ee88c7ee01
+  - enabled: 1
     path: Assets/Prototypes/Seamless 3.unity
     guid: 09ebc350b3c1fa84aaf5d2a09461d434
   - enabled: 1

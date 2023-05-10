@@ -53,6 +53,15 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""InkForm"",
+                    ""type"": ""Button"",
+                    ""id"": ""857ce79f-c842-40ed-b8d1-3407ffcd2107"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -143,6 +152,17 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
                     ""action"": ""interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8f08a148-f47d-47ee-8a16-0ba0ef93ab19"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""InkForm"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -154,6 +174,7 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
         m_base_jump = m_base.FindAction("jump", throwIfNotFound: true);
         m_base_move = m_base.FindAction("move", throwIfNotFound: true);
         m_base_interact = m_base.FindAction("interact", throwIfNotFound: true);
+        m_base_InkForm = m_base.FindAction("InkForm", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -218,6 +239,7 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_base_jump;
     private readonly InputAction m_base_move;
     private readonly InputAction m_base_interact;
+    private readonly InputAction m_base_InkForm;
     public struct BaseActions
     {
         private @JumperInput m_Wrapper;
@@ -225,6 +247,7 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
         public InputAction @jump => m_Wrapper.m_base_jump;
         public InputAction @move => m_Wrapper.m_base_move;
         public InputAction @interact => m_Wrapper.m_base_interact;
+        public InputAction @InkForm => m_Wrapper.m_base_InkForm;
         public InputActionMap Get() { return m_Wrapper.m_base; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -243,6 +266,9 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
             @interact.started += instance.OnInteract;
             @interact.performed += instance.OnInteract;
             @interact.canceled += instance.OnInteract;
+            @InkForm.started += instance.OnInkForm;
+            @InkForm.performed += instance.OnInkForm;
+            @InkForm.canceled += instance.OnInkForm;
         }
 
         private void UnregisterCallbacks(IBaseActions instance)
@@ -256,6 +282,9 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
             @interact.started -= instance.OnInteract;
             @interact.performed -= instance.OnInteract;
             @interact.canceled -= instance.OnInteract;
+            @InkForm.started -= instance.OnInkForm;
+            @InkForm.performed -= instance.OnInkForm;
+            @InkForm.canceled -= instance.OnInkForm;
         }
 
         public void RemoveCallbacks(IBaseActions instance)
@@ -278,5 +307,6 @@ public partial class @JumperInput: IInputActionCollection2, IDisposable
         void OnJump(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
+        void OnInkForm(InputAction.CallbackContext context);
     }
 }

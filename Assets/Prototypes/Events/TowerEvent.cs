@@ -63,4 +63,5 @@ public class TowerEvent : ScriptableObject, AnyTowerEvent
   public class BoolArray : WithState<bool[]> { };
   public class Float : WithState<float> { };
   public class FloatArray : WithState<float[]> { };
+  public class PlayerForm : WithState<ProtagController.PlayerForm> { };
 }
