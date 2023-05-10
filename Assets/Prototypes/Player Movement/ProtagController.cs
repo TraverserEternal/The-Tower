@@ -2,18 +2,23 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class ProtagController : MonoBehaviour
+public class ProtagController : Singleton<ProtagController>
 {
+  #region Serialized Fields
   [SerializeField] float maxMoveSpeed = 7;
   [SerializeField] float acceleration = 30;
   [SerializeField] float stopAcceleration = 2f;
   [SerializeField] float minMoveSpeed = 2f;
+  [SerializeField] public float maxOutOfPoolMoveSpeed = 15f;
+  #endregion
+  #region Autofilled Fields
   [SerializeField][HideInInspector] Rigidbody2D rb;
   [SerializeField][HideInInspector] GameObject humanoidObject;
   [SerializeField][HideInInspector] ProtagControllerHumanoid humanoid;
   [SerializeField][HideInInspector] GameObject inkPoolObject;
   [SerializeField][HideInInspector] ProtagControllerInkPool inkPool;
   [SerializeField][HideInInspector] GameObject inkBallObject;
+  #endregion
   public enum PlayerForm
   {
     Humanoid,
@@ -23,14 +28,17 @@ public class ProtagController : MonoBehaviour
   [HideInInspector] public TowerEvent.WithState<PlayerForm> currentForm { get; private set; }
 
   int moveDirection;
+  int lastPressedMoveDirection;
   bool isAffecting = true;
-  protected void Awake()
+  bool autoStop = true;
+  protected override void Awake()
   {
-    // base.Awake();
-    // if (destroying) return;
+    base.Awake();
+    if (destroying) return;
     currentForm = ScriptableObject.CreateInstance<TowerEvent.PlayerForm>();
     ChangeToHumanoid();
   }
+  #region Enable/Disable and Validation
   private void OnValidate()
   {
     rb = GetComponent<Rigidbody2D>();
@@ -43,7 +51,6 @@ public class ProtagController : MonoBehaviour
     inkPool = GetComponentInChildren<ProtagControllerInkPool>();
     inkPoolObject = inkPool.gameObject;
   }
-
   private void OnEnable()
   {
     I.actions.@base.move.performed += Move;
@@ -58,16 +65,18 @@ public class ProtagController : MonoBehaviour
     I.actions.@base.InkForm.performed -= ChangeForm;
     I.actions.Disable();
   }
-
+  #endregion
+  #region Form Change Functions
   public void ChangeToHumanoid(bool shouldJump = false, bool removeVelocity = false)
   {
     humanoidObject.SetActive(true);
     inkPoolObject.SetActive(false);
     inkBallObject.SetActive(false);
     isAffecting = true;
+    autoStop = true;
     currentForm.Set(PlayerForm.Humanoid);
     if (removeVelocity) rb.velocity = Vector2.zero;
-    if (shouldJump) humanoid.StartJump();
+    if (shouldJump) humanoid.StartJump(true);
   }
 
   public void ChangeToInkBall()
@@ -76,36 +85,38 @@ public class ProtagController : MonoBehaviour
     inkPoolObject.SetActive(false);
     humanoidObject.SetActive(false);
     isAffecting = true;
+    autoStop = false;
     currentForm.Set(PlayerForm.InkBall);
   }
 
-  public void ChangeToInkPool()
+  public void ChangeToInkPool(RaycastHit2D hit)
   {
+    inkPoolObject.SetActive(true);
     inkBallObject.SetActive(false);
     humanoidObject.SetActive(false);
     currentForm.Set(PlayerForm.InkPool);
     isAffecting = false;
 
-    int lockedMoveDirection;
     if (moveDirection == 0)
     {
-      if (rb.velocity.x > 0) lockedMoveDirection = 1;
-      else lockedMoveDirection = -1;
+      if (rb.velocity.x > 0) { inkPool.Init(1, hit); return; }
+      else if (rb.velocity.x == 0) { inkPool.Init(lastPressedMoveDirection, hit); return; }
+      inkPool.Init(-1, hit);
+      return;
     }
-    else lockedMoveDirection = moveDirection;
-
-    inkPoolObject.SetActive(true);
-    inkPool.Init(lockedMoveDirection);
+    inkPool.Init(moveDirection, hit);
   }
+  #endregion
 
   private void ChangeForm(InputAction.CallbackContext context)
   {
     switch (currentForm.v)
     {
       case PlayerForm.Humanoid:
-        if (IsGrounded())
+        var hit = GetGroundHit();
+        if (hit)
         {
-          ChangeToInkPool();
+          ChangeToInkPool(hit);
           break;
         }
         ChangeToInkBall();
@@ -119,19 +130,19 @@ public class ProtagController : MonoBehaviour
         break;
     }
   }
-  private bool IsGrounded()
+  private RaycastHit2D GetGroundHit()
   {
     int layerMask = LayerMask.GetMask("Ground");
     RaycastHit2D hit = Physics2D.Raycast(transform.position + (Vector3.down * .75f), Vector2.down, .1f, layerMask);
-    return hit.collider != null;
+    return hit;
   }
-
 
   private void Move(InputAction.CallbackContext context)
   {
-    // get the value of the move action's axis
     moveDirection = (int)context.ReadValue<float>();
-    if (Math.Abs(rb.velocity.x) < minMoveSpeed) rb.velocity = new Vector2(moveDirection * minMoveSpeed, rb.velocity.y);
+    if (context.performed) lastPressedMoveDirection = moveDirection;
+    if (!(Math.Abs(rb.velocity.x) < minMoveSpeed)) return;
+    rb.velocity = new Vector2(moveDirection * minMoveSpeed, rb.velocity.y);
   }
 
   private void Update()
@@ -143,7 +154,7 @@ public class ProtagController : MonoBehaviour
     var tAcceleration = acceleration * Time.deltaTime;
 
     // Stop or slow down the player if they don't want to be moving in the direction they're moving
-    if ((moveDirection == 0 || moveDirection * vX < 0))
+    if ((autoStop && moveDirection == 0) || moveDirection * vX < 0)
     {
       if (Math.Abs(vX) < stopAcceleration) rb.velocity = new Vector2(0, vY);
       else rb.velocity += new Vector2(tAcceleration * (vX > 0 ? -1 : 1), 0);

@@ -44,9 +44,9 @@ public class ProtagControllerHumanoid : MonoBehaviour
     StartJump();
   }
 
-  public void StartJump()
+  public void StartJump(bool ignoreGrounded = false)
   {
-    jump = StartCoroutine(Jump());
+    jump = StartCoroutine(Jump(ignoreGrounded));
   }
 
 
@@ -57,9 +57,9 @@ public class ProtagControllerHumanoid : MonoBehaviour
     return hit.collider != null;
   }
 
-  private IEnumerator Jump()
+  private IEnumerator Jump(bool ignoreGrounded)
   {
-    if (!IsGrounded()) yield break;
+    if (!ignoreGrounded && !IsGrounded()) yield break;
 
     float timer = jumpHoldTime;
     while (timer > 0)

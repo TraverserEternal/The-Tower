@@ -1,6 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class ProtagControllerInkBall : MonoBehaviour
 {
@@ -11,9 +9,13 @@ public class ProtagControllerInkBall : MonoBehaviour
   }
   private void OnCollisionEnter2D(Collision2D other)
   {
-    if (other.gameObject.CompareTag("Ground") && CollisionIsAtTop(other)) protagController.ChangeToInkPool();
+    if (other.gameObject.CompareTag("Ground"))
+    {
+      var hit = CollisionIsAtTop(other);
+      if (hit) protagController.ChangeToInkPool(hit);
+    }
   }
-  private bool CollisionIsAtTop(Collision2D collision)
+  private RaycastHit2D CollisionIsAtTop(Collision2D collision)
   {
     // Calculate the contact points of the collision
     ContactPoint2D[] contacts = collision.contacts;
@@ -24,10 +26,11 @@ public class ProtagControllerInkBall : MonoBehaviour
       // Check if the contact normal is approximately pointing upwards (top)
       if (Vector2.Dot(contacts[i].normal, Vector2.up) > 0.8f)
       {
-        return true;
+        var hit = Physics2D.Raycast(transform.position, Vector2.down, .75f, LayerMask.GetMask("Ground"));
+        if (Vector2.Dot(hit.normal, Vector2.up) > 0.8f) return hit;
       }
     }
 
-    return false;
+    return default(RaycastHit2D);
   }
 }
