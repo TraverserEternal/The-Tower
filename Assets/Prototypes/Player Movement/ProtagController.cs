@@ -51,14 +51,22 @@ public class ProtagController : MonoBehaviour
     I.actions.@base.InkForm.performed += ChangeForm;
     I.actions.Enable();
   }
+  private void OnDisable()
+  {
+    I.actions.@base.move.performed -= Move;
+    I.actions.@base.move.canceled -= Move;
+    I.actions.@base.InkForm.performed -= ChangeForm;
+    I.actions.Disable();
+  }
 
-  public void ChangeToHumanoid(bool shouldJump = false)
+  public void ChangeToHumanoid(bool shouldJump = false, bool removeVelocity = false)
   {
     humanoidObject.SetActive(true);
     inkPoolObject.SetActive(false);
     inkBallObject.SetActive(false);
     isAffecting = true;
     currentForm.Set(PlayerForm.Humanoid);
+    if (removeVelocity) rb.velocity = Vector2.zero;
     if (shouldJump) humanoid.StartJump();
   }
 
@@ -71,7 +79,7 @@ public class ProtagController : MonoBehaviour
     currentForm.Set(PlayerForm.InkBall);
   }
 
-  public void ChangeToInkPool(GameObject ground)
+  public void ChangeToInkPool()
   {
     inkBallObject.SetActive(false);
     humanoidObject.SetActive(false);
@@ -83,12 +91,11 @@ public class ProtagController : MonoBehaviour
     {
       if (rb.velocity.x > 0) lockedMoveDirection = 1;
       else lockedMoveDirection = -1;
-      return;
     }
-    lockedMoveDirection = moveDirection;
+    else lockedMoveDirection = moveDirection;
 
     inkPoolObject.SetActive(true);
-    inkPool.Init(ground, lockedMoveDirection);
+    inkPool.Init(lockedMoveDirection);
   }
 
   private void ChangeForm(InputAction.CallbackContext context)
@@ -96,12 +103,27 @@ public class ProtagController : MonoBehaviour
     switch (currentForm.v)
     {
       case PlayerForm.Humanoid:
+        if (IsGrounded())
+        {
+          ChangeToInkPool();
+          break;
+        }
         ChangeToInkBall();
         break;
       case PlayerForm.InkBall:
         ChangeToHumanoid();
         break;
+      case PlayerForm.InkPool:
+        transform.position += Vector3.up * 1;
+        ChangeToHumanoid(false, true);
+        break;
     }
+  }
+  private bool IsGrounded()
+  {
+    int layerMask = LayerMask.GetMask("Ground");
+    RaycastHit2D hit = Physics2D.Raycast(transform.position + (Vector3.down * .75f), Vector2.down, .1f, layerMask);
+    return hit.collider != null;
   }
 
 
@@ -109,7 +131,7 @@ public class ProtagController : MonoBehaviour
   {
     // get the value of the move action's axis
     moveDirection = (int)context.ReadValue<float>();
-    if (Math.Abs(rb.velocity.x) < .2) rb.velocity = new Vector2(moveDirection * minMoveSpeed, rb.velocity.y);
+    if (Math.Abs(rb.velocity.x) < minMoveSpeed) rb.velocity = new Vector2(moveDirection * minMoveSpeed, rb.velocity.y);
   }
 
   private void Update()

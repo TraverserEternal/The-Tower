@@ -10,6 +10,7 @@ public class ProtagControllerInkPool : MonoBehaviour
   [SerializeField] float moveSpeed;
   [HideInInspector] public int moveDirection;
   [SerializeField][HideInInspector] ProtagController protagController;
+  [SerializeField][HideInInspector] BoxCollider2D humanoidCollider;
   [SerializeField][HideInInspector] Rigidbody2D rb;
   [SerializeField][HideInInspector] BoxCollider2D boxCollider;
   Collider2D groundCollider;
@@ -19,6 +20,7 @@ public class ProtagControllerInkPool : MonoBehaviour
   {
     protagController = GetComponentInParent<ProtagController>();
     rb = GetComponentInParent<Rigidbody2D>();
+    humanoidCollider = rb.GetComponentInChildren<ProtagControllerHumanoid>().GetComponent<BoxCollider2D>();
     boxCollider = GetComponentInParent<BoxCollider2D>();
   }
   private void OnEnable()
@@ -33,32 +35,36 @@ public class ProtagControllerInkPool : MonoBehaviour
 
   private void ChangeBackToHuman(InputAction.CallbackContext context)
   {
-    protagController.ChangeToHumanoid(true);
+    rb.gameObject.transform.position += Vector3.up * 1;
     rb.velocity = new Vector2(moveSpeed * moveDirection, rb.velocity.y);
+    protagController.ChangeToHumanoid(true, false);
   }
   private void Update()
   {
     if (timer <= 0)
     {
-      protagController.ChangeToHumanoid();
+      rb.gameObject.transform.position += Vector3.up * 1;
+      protagController.ChangeToHumanoid(false, true);
       return;
     }
     timer -= Time.deltaTime;
 
-    // var hit = Physics2D.Raycast(transform.position, Vector2.up, 1f, LayerMask.GetMask("Ground"));
-    // rb.transform.position = new Vector3(hit.point.x, hit.point.y, 0);
+    var hit = Physics2D.Raycast(transform.position, Vector2.up, 1f, LayerMask.GetMask("Ground"));
+    var leftmostPosition = hit.transform.position.x - hit.collider.bounds.extents.x + boxCollider.bounds.extents.x;
+    var rightmostPosition = hit.transform.position.x + hit.collider.bounds.extents.x - boxCollider.bounds.extents.x;
+    float nextPositionx = Math.Clamp(hit.point.x + moveSpeed * moveDirection * Time.deltaTime, leftmostPosition, rightmostPosition);
+    rb.transform.position = new Vector3(
+      nextPositionx,
+      hit.point.y - boxCollider.bounds.extents.y,
+      0);
   }
 
-  internal void Init(GameObject ground, int moveDirection)
+  internal void Init(int moveDirection)
   {
-    this.ground = ground;
-    groundCollider = GetComponent<Collider2D>();
     this.moveDirection = moveDirection;
 
     var hit = Physics2D.Raycast(transform.position, Vector2.down, 1f, LayerMask.GetMask("Ground"));
-    var cube = GameObject.CreatePrimitive(PrimitiveType.Quad);
-    cube.transform.position = new Vector3(hit.point.x, hit.point.y, -1);
-    rb.transform.position = new Vector3(hit.point.x, hit.point.y, 0);
+    rb.transform.position = new Vector3(hit.point.x, hit.point.y - boxCollider.bounds.extents.y, 0);
     rb.simulated = false;
     timer = moveTime;
   }

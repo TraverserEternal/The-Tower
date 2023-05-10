@@ -60,6 +60,7 @@ public class ProtagControllerHumanoid : MonoBehaviour
   private IEnumerator Jump()
   {
     if (!IsGrounded()) yield break;
+
     float timer = jumpHoldTime;
     while (timer > 0)
     {
