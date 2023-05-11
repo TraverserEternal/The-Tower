@@ -13,7 +13,7 @@ public class SceneLoader : MonoBehaviour
 
   private void OnTriggerEnter2D(Collider2D other)
   {
-    if (other.gameObject.CompareTag("Player")) SeamlessSceneManager.current.LoadScenes(scenes.ToArray());
+    if (other.gameObject.CompareTag("Player")) SeamlessSceneManager.c.LoadScenes(scenes.ToArray());
   }
   private void Awake()
   {

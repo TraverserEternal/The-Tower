@@ -12,7 +12,7 @@ public class Door : SaveListener<bool>
     boxCollider2D = GetComponent<BoxCollider2D>();
     spriteRenderer = GetComponent<SpriteRenderer>();
   }
-  public override TowerEvent.WithState<bool> GetSaveData() => HearthanSaveManager.current.data.doorOpened;
+  public override TowerEvent.WithState<bool> GetSaveData() => HearthanSaveManager.c.data.doorOpened;
 
   protected override void OnSaveDataChange(bool doorOpened)
   {

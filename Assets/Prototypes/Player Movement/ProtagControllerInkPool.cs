@@ -1,14 +1,35 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class ProtagControllerInkPool : MonoBehaviour
 {
   #region Serialized Fields
-  [SerializeField] float moveTime;
-  [SerializeField] float moveSpeed;
+  public TextMeshProUGUI textElement;
+  public void UpdateTextElement()
+  {
+    // Build the string with property values
+    string propertyValues = $"Move Time: {moveTime}\n" +
+                            $"Move Speed: {moveSpeed}";
+
+    // Set the text element's text to the property values
+    textElement.text = propertyValues;
+  }
+  public void SetMoveTime(float value)
+  {
+    moveTime = value;
+  }
+
+  public void SetMoveSpeed(float value)
+  {
+    moveSpeed = value;
+  }
+
+  [SerializeField] public float moveTime;
+  [SerializeField] public float moveSpeed;
   #endregion
   #region Autofilled Fields;
   [SerializeField][HideInInspector] ProtagController protagController;
@@ -47,6 +68,7 @@ public class ProtagControllerInkPool : MonoBehaviour
   }
   private void Update()
   {
+    UpdateTextElement();
     if (timer <= 0)
     {
       rb.gameObject.transform.position += Vector3.up * 1;

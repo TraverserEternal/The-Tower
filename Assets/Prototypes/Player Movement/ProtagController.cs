@@ -1,15 +1,56 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class ProtagController : Singleton<ProtagController>
 {
   #region Serialized Fields
-  [SerializeField] float maxMoveSpeed = 7;
-  [SerializeField] float acceleration = 30;
-  [SerializeField] float stopAcceleration = 2f;
-  [SerializeField] float minMoveSpeed = 2f;
+  public TextMeshProUGUI textElement;
+  public void UpdateTextElement()
+  {
+    // Build the string with property values
+    string propertyValues = $"Max Move Speed: {maxMoveSpeed}\n" +
+                            $"Acceleration: {acceleration}\n" +
+                            $"Stop Acceleration: {stopAcceleration}\n" +
+                            $"Min Move Speed: {minMoveSpeed}\n" +
+                            $"Max Out Of Pool Move Speed: {maxOutOfPoolMoveSpeed}";
+
+    // Set the text element's text to the property values
+    textElement.text = propertyValues;
+  }
+  public void SetMaxMoveSpeed(float value)
+  {
+    maxMoveSpeed = value;
+  }
+
+  public void SetAcceleration(float value)
+  {
+    acceleration = value;
+  }
+
+  public void SetStopAcceleration(float value)
+  {
+    stopAcceleration = value;
+  }
+
+  public void SetMinMoveSpeed(float value)
+  {
+    minMoveSpeed = value;
+  }
+
+  public void SetMaxOutOfPoolMoveSpeed(float value)
+  {
+    maxOutOfPoolMoveSpeed = value;
+  }
+
+  [SerializeField] public float maxMoveSpeed = 7;
+  [SerializeField] public float acceleration = 30;
+  [SerializeField] public float stopAcceleration = 2f;
+  [SerializeField] public float minMoveSpeed = 2f;
   [SerializeField] public float maxOutOfPoolMoveSpeed = 15f;
+  [SerializeField] float lookaheadStrength;
+  [SerializeField] float maxLookaheadTargetMoveSpeed;
   #endregion
   #region Autofilled Fields
   [SerializeField][HideInInspector] Rigidbody2D rb;
@@ -18,6 +59,7 @@ public class ProtagController : Singleton<ProtagController>
   [SerializeField][HideInInspector] GameObject inkPoolObject;
   [SerializeField][HideInInspector] ProtagControllerInkPool inkPool;
   [SerializeField][HideInInspector] GameObject inkBallObject;
+  [SerializeField][HideInInspector] Transform lookaheadTarget;
   #endregion
   public enum PlayerForm
   {
@@ -31,6 +73,7 @@ public class ProtagController : Singleton<ProtagController>
   int lastPressedMoveDirection;
   bool isAffecting = true;
   bool autoStop = true;
+
   protected override void Awake()
   {
     base.Awake();
@@ -50,6 +93,8 @@ public class ProtagController : Singleton<ProtagController>
 
     inkPool = GetComponentInChildren<ProtagControllerInkPool>();
     inkPoolObject = inkPool.gameObject;
+
+    lookaheadTarget = transform.Find("Lookahead Target");
   }
   private void OnEnable()
   {
@@ -148,6 +193,9 @@ public class ProtagController : Singleton<ProtagController>
 
   private void Update()
   {
+    UpdateTextElement();
+    var velocityPosition = transform.position + new Vector3(rb.velocity.x, rb.velocity.y, 0) * lookaheadStrength;
+    lookaheadTarget.position = Vector3.MoveTowards(lookaheadTarget.position, velocityPosition, maxLookaheadTargetMoveSpeed * Time.deltaTime);
     if (!isAffecting) return;
     // Variable Setup
     var vX = rb.velocity.x;

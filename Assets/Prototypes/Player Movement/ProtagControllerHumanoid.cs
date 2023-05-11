@@ -1,14 +1,37 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 public class ProtagControllerHumanoid : MonoBehaviour
 {
-  [SerializeField] float jumpHeight = 1;
+  public TextMeshProUGUI textElement;
+  public void UpdateTextElement()
+  {
+    // Build the string with property values
+    string propertyValues = $"Jump Height: {jumpHeight}\n" +
+                            $"Jump Buffer: {jumpBuffer}";
+
+    // Set the text element's text to the property values
+    textElement.text = propertyValues;
+  }
+  public void SetJumpHeight(float value)
+  {
+    jumpHeight = value;
+  }
+
+  public void SetJumpBuffer(float value)
+  {
+    jumpBuffer = value;
+  }
+
+  [SerializeField] public float jumpHeight = 1;
+  [SerializeField] public float jumpBuffer = .1f;
   [SerializeField][HideInInspector] Rigidbody2D rb;
   [SerializeField][HideInInspector] BoxCollider2D boxCollider;
   bool jumping;
+  float jumpBufferTimer;
 
   private void OnValidate()
   {
@@ -38,12 +61,26 @@ public class ProtagControllerHumanoid : MonoBehaviour
   private void JumpPerformed(InputAction.CallbackContext context)
   {
     if (IsGrounded()) ForceJump();
+    else jumpBufferTimer = jumpBuffer;
   }
   private bool IsGrounded()
   {
     int layerMask = LayerMask.GetMask("Ground");
     RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, .8f, layerMask);
     return hit.collider != null;
+  }
+  private void Update()
+  {
+    UpdateTextElement();
+    if (jumpBufferTimer > 0)
+    {
+      jumpBufferTimer -= Time.deltaTime;
+      if (IsGrounded())
+      {
+        jumpBufferTimer = 0;
+        ForceJump();
+      }
+    }
   }
 
   internal void ForceJump()
