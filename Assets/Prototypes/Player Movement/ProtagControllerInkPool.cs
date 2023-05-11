@@ -41,7 +41,7 @@ public class ProtagControllerInkPool : MonoBehaviour
 
   private void ChangeBackToHuman(InputAction.CallbackContext context)
   {
-    rb.gameObject.transform.position += Vector3.up * 1;
+    rb.gameObject.transform.position += Vector3.up * 1.1f;
     rb.velocity = new Vector2(moveSpeed * moveDirection, 0);
     protagController.ChangeToHumanoid(true, false);
   }

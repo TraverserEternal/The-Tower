@@ -5,11 +5,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 public class ProtagControllerHumanoid : MonoBehaviour
 {
-  [SerializeField] float jumpForce = 1;
-  [SerializeField] float jumpHoldTime;
+  [SerializeField] float jumpHeight = 1;
   [SerializeField][HideInInspector] Rigidbody2D rb;
   [SerializeField][HideInInspector] BoxCollider2D boxCollider;
-  Coroutine jump;
+  bool jumping;
+
   private void OnValidate()
   {
     boxCollider = GetComponent<BoxCollider2D>();
@@ -24,51 +24,31 @@ public class ProtagControllerHumanoid : MonoBehaviour
   }
   void OnDisable()
   {
+    jumping = false;
     I.actions.@base.jump.performed -= JumpPerformed;
     I.actions.@base.jump.canceled -= JumpCanceled;
   }
 
   private void JumpCanceled(InputAction.CallbackContext context)
   {
-    if (jump != null)
-    {
-      StopCoroutine(jump);
-      if (rb.velocity.y > 0) rb.velocity = new Vector2(rb.velocity.x, 0);
-      jump = null;
-    }
-
+    if (jumping && !IsGrounded() && rb.velocity.y > 0) rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, 0, 2));
+    else jumping = false;
   }
 
   private void JumpPerformed(InputAction.CallbackContext context)
   {
-    StartJump();
+    if (IsGrounded()) ForceJump();
   }
-
-  public void StartJump(bool ignoreGrounded = false)
-  {
-    jump = StartCoroutine(Jump(ignoreGrounded));
-  }
-
-
   private bool IsGrounded()
   {
     int layerMask = LayerMask.GetMask("Ground");
-    RaycastHit2D hit = Physics2D.Raycast(transform.position + (Vector3.down * (boxCollider.bounds.size.y / 2)), Vector2.down, .1f, layerMask);
+    RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, .8f, layerMask);
     return hit.collider != null;
   }
 
-  private IEnumerator Jump(bool ignoreGrounded)
+  internal void ForceJump()
   {
-    if (!ignoreGrounded && !IsGrounded()) yield break;
-
-    float timer = jumpHoldTime;
-    while (timer > 0)
-    {
-      rb.velocity = new Vector2(rb.velocity.x, jumpForce * timer / jumpHoldTime);
-      timer -= Time.deltaTime;
-      yield return new WaitForEndOfFrame();
-    }
-    jump = null;
+    jumping = true;
+    rb.AddForce(Vector2.up * Mathf.Sqrt(-2.0f * Physics2D.gravity.y * jumpHeight), ForceMode2D.Impulse);
   }
-
 }
